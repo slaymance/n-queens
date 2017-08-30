@@ -79,12 +79,50 @@
     //
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(rowIndex) {
-      return false; // fixme
+      // console.log('hello', this.attributes);
+      var board = this.attributes;
+      var results = false;
+      var count = 0;
+
+      board[rowIndex].forEach(function(ele) {
+        // console.log('ele', ele)
+        if (ele === 1) {
+          count++;
+        }
+      })
+        if (count > 1) {
+          results = true;
+        }
+      return results; 
     },
 
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
-      return false; // fixme
+      // console.log('hello', this.attributes);
+      var board = this.attributes;
+      var results = false;
+      //set a count
+      //loop through the board object
+        //for each row count how many elements equal 1;
+        // if there are more than 1 '1' in any row return true;
+      var count = 0;
+      for(var i in board) {
+        count = 0;
+        // console.log('problem', i, board[i], board)
+        // console.log('row maybe', board[i])
+        if (Array.isArray(board[i])) {
+          board[i].forEach(function(ele) {
+            // console.log('ele', ele)
+            if (ele === 1) {
+              count++;
+            }
+          })
+          if (count > 1) {
+            results = true;
+          }
+        }
+      }
+      return results; 
     },
 
 
@@ -94,12 +132,36 @@
     //
     // test if a specific column on this board contains a conflict
     hasColConflictAt: function(colIndex) {
-      return false; // fixme
+      var board = this.attributes;
+      var count = 0;
+
+      for (var i in board) {
+        var row = board[i];
+        if (Array.isArray(row)) {
+          if (row[0] === 1) {
+            count++;
+          }
+        }
+      }
+      if (count > 1) {
+        return true;
+      }
+      return false; 
     },
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
-      return false; // fixme
+      var board = this.attributes;
+      var context = this;
+      var results = false;
+      
+      board[0].forEach(function(column, columnIndex) {
+        if (context.hasColConflictAt(columnIndex)) {
+          results = true;
+        }
+      })
+
+      return results;
     },
 
 
@@ -108,13 +170,44 @@
     // --------------------------------------------------------------
     //
     // test if a specific major diagonal on this board contains a conflict
-    hasMajorDiagonalConflictAt: function(majorDiagonalColumnIndexAtFirstRow) {
-      return false; // fixme
+    hasMajorDiagonalConflictAt: function(roIndex, majorDiagonalColumnIndexAtFirstRow) {
+      var board = this.attributes;
+      // start with first row index 
+      var rowIndex = roIndex;
+      var columnIndex = majorDiagonalColumnIndexAtFirstRow;
+      var count = 0;
+      // add one to the row index and also to the column index and set it to a variable newIndex
+      var recursive = function(rowIndex, colIndex) {
+
+        if (Array.isArray(board[rowIndex]) &&board[rowIndex][colIndex] === 1) {
+          count++;
+        }
+        // console.log('problem', board)
+        if (board[rowIndex + 1] && board[rowIndex + 1][colIndex + 1]) {
+          recursive(rowIndex + 1, colIndex + 1)
+        }
+      }
+      //check if newIndex has a value of one
+      //repeat this until you run out of squares
+      recursive(rowIndex, columnIndex);
+      return count > 1; 
     },
+
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      return false; // fixme
+      var board = this.attributes;
+      var result = false;
+      var context = this;
+
+      for (var i in board) {
+        if (Array.isArray(board[i])) {
+          board[i].forEach(function(ele, index) {
+            result = !!context.hasMajorDiagonalConflictAt(i, index);
+          })
+        }
+      }
+      return result;
     },
 
 
