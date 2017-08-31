@@ -49,8 +49,8 @@
       return (
         this.hasRowConflictAt(rowIndex) ||
         this.hasColConflictAt(colIndex) ||
-        this.hasMajorDiagonalConflictAt(this._getFirstRowColumnIndexForMajorDiagonalOn(rowIndex, colIndex)) ||
-        this.hasMinorDiagonalConflictAt(this._getFirstRowColumnIndexForMinorDiagonalOn(rowIndex, colIndex))
+        this.hasMajorDiagonalConflictAt(rowIndex, colIndex) ||
+        this.hasMinorDiagonalConflictAt(rowIndex, colIndex)
       );
     },
 
@@ -174,16 +174,20 @@
     // --------------------------------------------------------------
     //
     // test if a specific major diagonal on this board contains a conflict
-    hasMajorDiagonalConflictAt: function(roIndex, majorDiagonalColumnIndexAtFirstRow) {
+    hasMajorDiagonalConflictAt: function(roIndex, majorDiagonalColumnIndexAtFirstRow) { 
       var board = this.rows();
       // start with first row index 
       var rowIndex = roIndex;
       var columnIndex = majorDiagonalColumnIndexAtFirstRow;
       var count = 0;
       var result = false;
+      var recursiveCount = 0;
+      var checkedCoordinates = {};
       // add one to the row index and also to the column index and set it to a variable newIndex
       var recursive = function(rowIndex, colIndex) {
-
+        recursiveCount++;
+        checkedCoordinates[`${rowIndex}, ${colIndex}`] = true;
+        //checks if there is more than one element in majorDiagonal
         if (board[rowIndex][colIndex] === 1) {
           count++;
           if (count > 1) {
@@ -191,13 +195,20 @@
             return;
           }
         }
+        // if ((recursiveCount > 1) && (rowIndex === roIndex) && (colIndex === majorDiagonalColumnIndexAtFirstRow)) {
+        //   return;
+        // }
         // console.log('problem', board)
-        if (board[rowIndex + 1] !== undefined && board[rowIndex + 1][colIndex + 1] !== undefined) {
+        if (board[rowIndex + 1] !== undefined && board[rowIndex + 1][colIndex + 1] !== undefined && !checkedCoordinates[`${rowIndex + 1}, ${colIndex + 1}`]) {
           recursive(rowIndex + 1, colIndex + 1);
-        }
+        } 
+        if (board[rowIndex - 1] !== undefined && board[rowIndex - 1][colIndex - 1] !== undefined && !checkedCoordinates[`${rowIndex - 1}, ${colIndex - 1}`]) {     
+          recursive(rowIndex - 1, colIndex - 1);
+        } 
       };
       //check if newIndex has a value of one
       //repeat this until you run out of squares
+      // debugger;
       recursive(rowIndex, columnIndex);
       return result; 
     },
@@ -232,9 +243,12 @@
       var columnIndex = minorDiagonalColumnIndexAtFirstRow;
       var count = 0;
       var result = false;
+      var recursiveCount = 0;
+      var checkedCoordinates = {};
       // add one to the row index and also to the column index and set it to a variable newIndex
       var recursive = function(rowIndex, colIndex) {
-
+        checkedCoordinates[`${rowIndex}, ${colIndex}`] = true;
+        recursiveCount++;
         if (board[rowIndex][colIndex] === 1) {
           count++;
           if (count > 1) {
@@ -242,10 +256,17 @@
             return;
           }
         }
+
+        // if ((recursiveCount > 1) && (rowIndex === roIndex) && (colIndex === minorDiagonalColumnIndexAtFirstRow && ``)) {
+        //   return;
+        // }
         // console.log('problem', board)
-        if (board[rowIndex + 1] !== undefined && board[rowIndex + 1][colIndex - 1] !== undefined) {
+        if (board[rowIndex + 1] !== undefined && board[rowIndex + 1][colIndex - 1] !== undefined && !checkedCoordinates[`${rowIndex + 1}, ${colIndex - 1}`]) {
           recursive(rowIndex + 1, colIndex - 1);
-        }
+        } 
+        if (board[rowIndex - 1] !== undefined && board[rowIndex - 1][colIndex + 1] !== undefined && !checkedCoordinates[`${rowIndex - 1}, ${colIndex + 1}`]) {
+          recursive(rowIndex - 1, colIndex + 1);
+        } 
       };
       //check if newIndex has a value of one
       //repeat this until you run out of squares
