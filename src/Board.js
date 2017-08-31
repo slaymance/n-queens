@@ -3,7 +3,7 @@
 // The only portions you need to work on are the helper functions (below)
 
 (function() {
-
+  window.callCount = 0;
   window.Board = Backbone.Model.extend({
 
     initialize: function (params) {
@@ -40,6 +40,10 @@
     hasAnyRooksConflicts: function() {
       return this.hasAnyRowConflicts() || this.hasAnyColConflicts();
     },
+
+    hasAnyRooksConflictsOn: function(rowIndex, colIndex) {
+      return (this.hasRowConflictAt(rowIndex) || this.hasColConflictAt(colIndex));
+    }, 
 
     hasAnyQueenConflictsOn: function(rowIndex, colIndex) {
       return (
@@ -80,7 +84,7 @@
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(rowIndex) {
       // console.log('hello', this.attributes);
-      var board = this.attributes;
+      var board = this.rows();
       var results = false;
       var count = 0;
 
@@ -89,10 +93,10 @@
         if (ele === 1) {
           count++;
         }
-      })
-        if (count > 1) {
-          results = true;
-        }
+      });
+      if (count > 1) {
+        results = true;
+      }
       return results; 
     },
 
@@ -106,7 +110,7 @@
         //for each row count how many elements equal 1;
         // if there are more than 1 '1' in any row return true;
       var count = 0;
-      for(var i in board) {
+      for (var i in board) {
         count = 0;
         // console.log('problem', i, board[i], board)
         // console.log('row maybe', board[i])
@@ -116,7 +120,7 @@
             if (ele === 1) {
               count++;
             }
-          })
+          });
           if (count > 1) {
             results = true;
           }
@@ -132,10 +136,10 @@
     //
     // test if a specific column on this board contains a conflict
     hasColConflictAt: function(colIndex) {
-      var board = this.attributes;
+      var board = this.rows();
       var count = 0;
 
-      for (var i in board) {
+      for (var i = 0; i < board.length; i++) {
         var row = board[i];
         if (Array.isArray(row)) {
           if (row[0] === 1) {
@@ -159,7 +163,7 @@
         if (context.hasColConflictAt(columnIndex)) {
           results = true;
         }
-      })
+      });
 
       return results;
     },
@@ -171,42 +175,47 @@
     //
     // test if a specific major diagonal on this board contains a conflict
     hasMajorDiagonalConflictAt: function(roIndex, majorDiagonalColumnIndexAtFirstRow) {
-      var board = this.attributes;
+      var board = this.rows();
       // start with first row index 
       var rowIndex = roIndex;
       var columnIndex = majorDiagonalColumnIndexAtFirstRow;
       var count = 0;
+      var result = false;
       // add one to the row index and also to the column index and set it to a variable newIndex
       var recursive = function(rowIndex, colIndex) {
 
-        if (Array.isArray(board[rowIndex]) &&board[rowIndex][colIndex] === 1) {
+        if (board[rowIndex][colIndex] === 1) {
           count++;
+          if (count > 1) {
+            result = true;
+            return;
+          }
         }
         // console.log('problem', board)
-        if (board[rowIndex + 1] && board[rowIndex + 1][colIndex + 1]) {
-          recursive(rowIndex + 1, colIndex + 1)
+        if (board[rowIndex + 1] !== undefined && board[rowIndex + 1][colIndex + 1] !== undefined) {
+          recursive(rowIndex + 1, colIndex + 1);
         }
-      }
+      };
       //check if newIndex has a value of one
       //repeat this until you run out of squares
       recursive(rowIndex, columnIndex);
-      return count > 1; 
+      return result; 
     },
 
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      var board = this.attributes;
+      var board = this.rows();
       var result = false;
       var context = this;
 
-      for (var i in board) {
-        if (Array.isArray(board[i])) {
-          board[i].forEach(function(ele, index) {
-            result = !!context.hasMajorDiagonalConflictAt(i, index);
-          })
-        }
-      }
+      board.forEach(function(row, rowIndex) {
+        row.forEach(function(ele, index) {
+          if (context.hasMajorDiagonalConflictAt(rowIndex, index)) {
+            result = true;
+          }
+        });
+      }); 
       return result;
     },
 
@@ -216,13 +225,48 @@
     // --------------------------------------------------------------
     //
     // test if a specific minor diagonal on this board contains a conflict
-    hasMinorDiagonalConflictAt: function(minorDiagonalColumnIndexAtFirstRow) {
-      return false; // fixme
+    hasMinorDiagonalConflictAt: function(roIndex, minorDiagonalColumnIndexAtFirstRow) {
+      var board = this.rows();
+      // start with first row index 
+      var rowIndex = roIndex;
+      var columnIndex = minorDiagonalColumnIndexAtFirstRow;
+      var count = 0;
+      var result = false;
+      // add one to the row index and also to the column index and set it to a variable newIndex
+      var recursive = function(rowIndex, colIndex) {
+
+        if (board[rowIndex][colIndex] === 1) {
+          count++;
+          if (count > 1) {
+            result = true;
+            return;
+          }
+        }
+        // console.log('problem', board)
+        if (board[rowIndex + 1] !== undefined && board[rowIndex + 1][colIndex - 1] !== undefined) {
+          recursive(rowIndex + 1, colIndex - 1);
+        }
+      };
+      //check if newIndex has a value of one
+      //repeat this until you run out of squares
+      recursive(rowIndex, columnIndex);
+      return result; 
     },
 
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
-      return false; // fixme
+      var board = this.rows();
+      var result = false;
+      var context = this;
+
+      board.forEach(function(row, rowIndex) {
+        row.forEach(function(ele, index) {
+          if (context.hasMinorDiagonalConflictAt(rowIndex, index, board)) {
+            result = true;
+          }
+        });
+      }); 
+      return result;
     }
 
     /*--------------------  End of Helper Functions  ---------------------*/
