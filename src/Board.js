@@ -142,7 +142,7 @@
       for (var i = 0; i < board.length; i++) {
         var row = board[i];
         if (Array.isArray(row)) {
-          if (row[0] === 1) {
+          if (row[colIndex] === 1) {
             count++;
           }
         }
