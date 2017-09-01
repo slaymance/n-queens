@@ -103,7 +103,7 @@
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
       // console.log('hello', this.attributes);
-      var board = this.attributes;
+      var board = this.rows();
       var results = false;
       //set a count
       //loop through the board object
@@ -155,15 +155,21 @@
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
-      var board = this.attributes;
+      var board = this.rows();
       var context = this;
       var results = false;
-      
-      board[0].forEach(function(column, columnIndex) {
-        if (context.hasColConflictAt(columnIndex)) {
-          results = true;
-        }
-      });
+      if (!Array.isArray(board[0])) {
+        debugger;
+      }
+      if (Array.isArray(board[0])) {
+        console.log('hello')
+        // debugger;
+        board[0].forEach(function(column, columnIndex) {
+          if (context.hasColConflictAt(columnIndex)) {
+            results = true;
+          }
+        });
+      }
 
       return results;
     },
