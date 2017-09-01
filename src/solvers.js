@@ -28,176 +28,81 @@ window.findNRooksSolution = function(n) {
 
 
   var board = new Board(emptyBoard);
-  // console.log('Board: ' + board.hasAnyRooksConflictsOn(0, 0));
-  // console.log('board', board, emptyBoard);
   emptyBoard.forEach(function(row, rowIndex) {
     row.forEach(function(ele, colIndex) {
-      // console.log('First board: ' + board.rows());
       board.rows()[rowIndex][colIndex] = 1;
       if (board.hasAnyRooksConflictsOn(rowIndex, colIndex)) {
         board.rows()[rowIndex][colIndex] = 0;
-        // console.log('Second board: ' + board.rows());
       }      
     });
   });
-  
-  // console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
-  // console.log('maybe board', n, 'board', board)
   return board.rows();
 };
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
-window.countNRooksSolutions = function(n) {
+window.countNRooksSolutions = function(n, rowIndex = 0, rookStorage = {}, solutionCount = 0, rookCount = 0) {
   var solutionCount = 0; //fixme
-  //iterate through first row, setting the element to 1
-  //  then recursively find every permutation with a 1 at that element
-  //  base case would be last row can't move its 1
-  //
-  var emptyBoard = new Array(n);
-  for (var i = 0; i < n; i++) {
-    emptyBoard[i] = [];
-    for (var j = 0; j < n; j++) {
-      emptyBoard[i].push(0);
-    } 
-  }
-  
-  if (n === 2) {
-    console.log('n === 2');
-    // debugger;
-  }
-  // var board = new Board(emptyBoard);
-  // for (var m = 0; m < emptyBoard.length; i++) {
-  var recursive = function(rowIndex, colIndex, board) {
-    //loop from 0 - n with variable i'
-    var newBoard = new Board(board);
-    var board = newBoard.rows();
+  var rookCount = 0;
 
+  var recursive = function(rowIndex, rookStorage = {}) {
     if (rowIndex === n) {
-      solutionCount++;
+      if (rookCount === n) { solutionCount++; }
       return;
     }
-
-    for (var i = 0; i < board[rowIndex].length; i++) {  
-      newBoard.rows()[rowIndex][i] = 1;
-      if (newBoard.hasAnyRooksConflictsOn(rowIndex, i)) {
-        newBoard.rows()[rowIndex][i] = 0;
-      } else {
-        recursive(rowIndex + 1, 0, newBoard.rows());
-        newBoard.rows()[rowIndex][i] = 0;
+    for (var colIndex = 0; colIndex < n; colIndex++) {  
+      if (!rookStorage[`row ${rowIndex}`] && !rookStorage[`col ${colIndex}`]) {
+        rookStorage[`row ${rowIndex}`] = true;
+        rookStorage[`col ${colIndex}`] = true;
+        rookCount++;
+        recursive(rowIndex + 1, rookStorage);
+        rookStorage[`row ${rowIndex}`] = false;
+        rookStorage[`col ${colIndex}`] = false;
+        rookCount--;
       }
-    }
-      
-
-    // recursive(index, index, board.rows());
-    
+    }    
   };
-  recursive(0, 0, emptyBoard);
-
-//build board
-//recursly(rowIndex, colIndex) call 0,i
-//base case: if rowIndex === n, store board as solution, return
-//place one at cordinate
-//check if theres a column conflict
-//if yes, make cordinate equal 0
-//recursive(rowIndex, colIndex + 1)
-//if not, recursive(rowIndex + 1, 0)
-//check for row conflict
-//if there is a row conflict set coordinate to 0
-  //recurse()
-// otherwise, call the recursion(rowIndex)
-
-  
-  
-
-  console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
+  recursive(0);
   return solutionCount;
 };
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  var solution = undefined; //fixme
+  var solution = undefined; 
 
-  // console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
   return solution;
 };
 
-// return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
-// _____________________________________________________________________________________________________________________________
 
-// _____________________________________________________________________________________________________________________________
 window.countNQueensSolutions = function(n) {
 
-  if (n === 0) {
-    console.log('it was 0')
-    return 1;
-  }
-  var solutionCount = 0; //fixme
+  var solutionCount = 0; 
   var queensCount = 0;
-  //iterate through first row, setting the element to 1
-  //  then recursively find every permutation with a 1 at that element
-  //  base case would be last row can't move its 1
-  //
-  var emptyBoard = new Array(n);
-  for (var i = 0; i < n; i++) {
-    emptyBoard[i] = [];
-    for (var j = 0; j < n; j++) {
-      emptyBoard[i].push(0);
-    } 
-  }
-  
-  // if (n === 2) {
-  //   console.log('n === 2');
-  //   debugger;
-  // }
-  // var board = new Board(emptyBoard);
-  // for (var m = 0; m < emptyBoard.length; i++) {
-  var recursive = function(rowIndex, colIndex, board) {
-    //loop from 0 - n with variable i'
-    var newBoard = new Board(board);
-    var board = newBoard.rows();
 
+  var recursive = function(rowIndex, queenStorage = {}) {
     if (rowIndex === n) {
       if (queensCount === n) { solutionCount++; }
       return;
     }
-    
 
-    for (var i = 0; i < board[rowIndex].length; i++) {  
-      newBoard.rows()[rowIndex][i] = 1;
-      queensCount++;
-      if (newBoard.hasAnyQueenConflictsOn(rowIndex, i)) {
-        newBoard.rows()[rowIndex][i] = 0;
-        queensCount--;
-      // console.log('test', newBoard.rows())
-      } else {  //used to be just else
-        recursive(rowIndex + 1, 0, newBoard.rows());
-        newBoard.rows()[rowIndex][i] = 0;
+    for (var colIndex = 0; colIndex < n; colIndex++) {  
+
+      var sum = colIndex + rowIndex;
+      var diff = colIndex - rowIndex;
+      if (!queenStorage[`row ${rowIndex}`] && !queenStorage[`col ${colIndex}`] && !queenStorage[`sum ${sum}`] && !queenStorage[`diff ${diff}`]) {
+        queenStorage[`row ${rowIndex}`] = true;
+        queenStorage[`col ${colIndex}`] = true;
+        queenStorage[`sum ${sum}`] = true;
+        queenStorage[`diff ${diff}`] = true;
+        queensCount++;
+        recursive(rowIndex + 1, queenStorage);
+        queenStorage[`row ${rowIndex}`] = false;
+        queenStorage[`col ${colIndex}`] = false;
+        queenStorage[`sum ${sum}`] = false;
+        queenStorage[`diff ${diff}`] = false;
         queensCount--;
       }
     }
-    
   };
-  if (n === 4) {
-    debugger;
-  }
-  recursive(0, 0, emptyBoard);
-
-//build board
-//recursly(rowIndex, colIndex) call 0,i
-//base case: if rowIndex === n, store board as solution, return
-//place one at cordinate
-//check if theres a column conflict
-//if yes, make cordinate equal 0
-//recursive(rowIndex, colIndex + 1)
-//if not, recursive(rowIndex + 1, 0)
-//check for row conflict
-//if there is a row conflict set coordinate to 0
-  //recurse()
-// otherwise, call the recursion(rowIndex)
-
-  
-  
-
-  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+  recursive(0);
   return solutionCount;
 };
