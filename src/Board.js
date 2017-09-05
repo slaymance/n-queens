@@ -162,8 +162,6 @@
         debugger;
       }
       if (Array.isArray(board[0])) {
-        console.log('hello')
-        // debugger;
         board[0].forEach(function(column, columnIndex) {
           if (context.hasColConflictAt(columnIndex)) {
             results = true;

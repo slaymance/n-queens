@@ -98,35 +98,24 @@ window.findNQueensSolution = function(n) {
 
 
 window.countNQueensSolutions = function(n) {
+  const validSolution = 2 ** n - 1;
+  let solutionCount = 0;
 
-  var solutionCount = 0; 
-  var queensCount = 0;
-
-  var recursive = function(rowIndex, queenStorage = {}) {
-    if (rowIndex === n) {
-      if (queensCount === n) { solutionCount++; }
+  function recursive(majorDiagonal, column, minorDiagonal) {
+    console.log('Start Recursion');
+    if (column === validSolution) {
+      solutionCount++;
       return;
     }
 
-    for (var colIndex = 0; colIndex < n; colIndex++) {  
+    let possibleSolution = ~(majorDiagonal | column | minorDiagonal);
 
-      var sum = colIndex + rowIndex;
-      var diff = colIndex - rowIndex;
-      if (!queenStorage[`row ${rowIndex}`] && !queenStorage[`col ${colIndex}`] && !queenStorage[`sum ${sum}`] && !queenStorage[`diff ${diff}`]) {
-        queenStorage[`row ${rowIndex}`] = true;
-        queenStorage[`col ${colIndex}`] = true;
-        queenStorage[`sum ${sum}`] = true;
-        queenStorage[`diff ${diff}`] = true;
-        queensCount++;
-        recursive(rowIndex + 1, queenStorage);
-        queenStorage[`row ${rowIndex}`] = false;
-        queenStorage[`col ${colIndex}`] = false;
-        queenStorage[`sum ${sum}`] = false;
-        queenStorage[`diff ${diff}`] = false;
-        queensCount--;
-      }
+    while (possibleSolution & validSolution) {
+      let powerOfTwo = possibleSolution & -possibleSolution;
+      possibleSolution -= powerOfTwo;
+      recursive((majorDiagonal|powerOfTwo)>>1, column|powerOfTwo, (minorDiagonal|powerOfTwo)<<1)
     }
   };
-  recursive(0);
+  recursive(0, 0, 0);
   return solutionCount;
 };
